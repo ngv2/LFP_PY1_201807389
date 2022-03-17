@@ -6,9 +6,12 @@ from tkinter import scrolledtext
 from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
 
+from lectura import lectura
+
 
 class interfaz:
     def __init__(self, ventana):
+        self.lexico = lectura()
         self.ventana = ventana
         self.ventana.geometry (str(720) + 'x' + str(720) + '+' + str(self.ventana.winfo_screenwidth() // 2 - 720 // 2) + '+' + str(self.ventana.winfo_screenheight() // 2 - 720 // 2))
         self.ventana.resizable (0, 0)
@@ -42,7 +45,7 @@ class interfaz:
     def anarchivo(self):
         contenido = self.textobox.get('1.0', END)
         if len(contenido) -1>0:
-            print(contenido)
+            self.lexico.leyendo(contenido)
         else:
             messagebox.showwarning('Proyecto 1', 'Error: No hay contenido en el archivo')
 
