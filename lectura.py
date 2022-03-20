@@ -1,8 +1,10 @@
+from select import select
 from token import token
-from typing import TextIO
+import webbrowser
 
 
 class lectura:
+    listatoken = None
     def leyendo(self, contenido):
         contenido = contenido.lower()
         estado = 0
@@ -145,7 +147,7 @@ class lectura:
                     elif ord(l) == 93 and subestado == 1:
                         self.listatoken.append (token('Simbolo', l, fila, columna))
                     elif ord(l) == 126 and subestado == 0:
-                        self.listatoken.append (token('simbolo', "", fila, columna))
+                        self.listatoken.append (token('Simbolo', "", fila, columna))
                         concatenar += l
                 elif estado == 3:
                     if ord(l) == 34 and subestado == 1:
@@ -179,6 +181,7 @@ class lectura:
         return False
 
     def comprobarsimbolos(self, caracter):
+        simbolo = ""
         if (ord(caracter) >= 33 and ord(caracter) <= 47) or (ord(caracter) >= 58 and ord(caracter) <= 64) or (ord(caracter) >= 91 and ord(caracter) <= 96 or (ord(caracter) >= 123 and ord(caracter) <= 126)): 
         
             return True 
@@ -210,34 +213,195 @@ class lectura:
             elif (self.listatoken[i].valor == "\'" and self.listatoken[i].tok == "Simbolo" and self.listatoken[i-1].valor == "[" and self.listatoken[i-1].tok == "Simbolo") or (self.listatoken[i].valor == "\'" and self.listatoken[i].tok == "Simbolo" and self.listatoken[i-1].valor == "," and self.listatoken[i-1].tok == "Simbolo"):
                 listacomponentes.append(self.listatoken[i+1].valor)
             elif self.listatoken[i].valor == ">" and self.listatoken[i].tok == "Simbolo":
-                print(tipo + " " + valor + " " + fondo + " " + evento + " " + str(listacomponentes))
                 if tipo == "etiqueta":
                     if valor != "":
-                        armar += "<label>" + valor + "</label>\n"
+                        armar += "<label>" + valor + "</label><br>\n"
                     else :
-                        armar += "<label>label</label>\n"
+                        armar += "<label>label</label><br>\n"
                 elif tipo == "texto":
                     if valor != "" and fondo != "":
-                        armar += '''<input type = "text" placeholder = "'''+ fondo +'''">'''+ valor +'''</input>\n'''
+                        armar += '''<input type = "text" placeholder = "'''+ fondo +'''" value = "'''+ valor +'''"><br>\n'''
                     elif valor == "" and fondo != "":
-                        armar += '''<input type = "text" placeholder = "'''+ fondo +'''"></input>\n'''
+                        armar += '''<input type = "text" placeholder = "'''+ fondo +'''"><br>\n'''
                     elif valor != "" and fondo == "":
-                        armar += '''<input type = "text">'''+ valor +'''</input>\n'''
+                        armar += '''<input type = "text" value = "'''+ valor +'''"><br>\n'''
                     elif valor == "" and fondo == "":
-                        armar += '''<input type = "text"></input>\n'''
+                        armar += '''<input type = "text"><br>\n'''
                 elif tipo == "grupo-radio" or tipo == "grupo-option":
-                    if valor != "":
+                    if valor != "" and len(listacomponentes) > 0:
+                        armar += "<label>" + valor + ":</label>\n"
+                        if tipo == "grupo-radio":
+                            for el in listacomponentes:
+                                armar += '''<input type = "radio" value = "''' + el + '''" name = "''' + valor + '''"> <label>'''+ el +''' </label>\n''' 
+                            armar += "<br>"
+                        else:
+                            armar += "<select>\n"
+                            armar += '''<option selected = "true" disabled = "disabled"> Elija </option>\n'''
+                            for el in listacomponentes:
+                                armar += '''<option value = "''' + el + '''">''' + el + '''</option>\n'''
+                            armar += "</select><br>"
+                    elif valor == "" and listacomponentes > 0:
+                        armar += "<label>Opciones:</label>\n"
+                        if tipo == "grupo-radio":
+                            for el in listacomponentes:
+                                armar += '''<input type = "radio" value = "''' + el + '''" name = "opcion"> <label>'''+ el +''' </label>\n''' 
+                            armar += "<br>"
+                        else:
+                            armar += "<select>\n"
+                            armar += '''<option selected = "true" disabled = "disabled"> Elija </option>\n'''
+                            for el in listacomponentes:
+                                armar += '''<option value = "''' + el + '''">''' + el + '''</option>\n'''
+                            armar += "</select><br>"
+                elif tipo == "boton":
+                    if valor != "" and evento != "":
+                        if evento == "entrada":
+                            armar += '''<button onclick="clickf(event)">'''+ valor + '''</button>\n'''
+                        elif evento == "info":
+                            armar += '''<button onclick="clickf2(event)">''' + valor + '''</button>\n'''
+                    elif valor == "" and evento != "":
+                        if evento == "entrada":
+                            armar += '''<button onclick="clickf(event)"> Boton </button>\n'''
+                        elif evento == "info":
+                            armar += '''<button onclick="clickf2(event)"> Boton </button>\n'''
+                    elif valor == "" and evento == "":
+                        armar += '''<button> Boton </button>\n'''
 
                 tipo = valor = evento = fondo = ""
                 listacomponentes = []
 
+        armar += '''</form>
+        <div id = "contenedor"></div><br>\n'''
+        armar += ''' <script>
+            function clickf(ev){
+                ev.preventDefault();
+                var divc=document.getElementById("contenedor");
+                var escribiendo=document.createElement("iframe");
+                escribiendo.setAttribute("src", "''' + self.linkarchivo + '''");
+                divc.appendChild(escribiendo);
+            }
+            function clickf2(ev){
+                ev.preventDefault();
+                var info="";
+                var divc=document.getElementById("contenedor");
+                var escribiendo=document.createElement("iframe");
+                var inputI=document.getElementsByTagName("input");
+                var selectI=document.getElementsByTagName("select");
+                for (i=0; i<inputI.length; i++){
+                    if(inputI[i].type == "radio"){
+                        if(inputI[i].checked == true){
+                            info += "<p>" + inputI[i].value + "</p>";
+                        }
+                    }else{
+                        info += "<p>" + inputI[i].value + "</p>";
+                    }
+                }
+                for (i=0; i<selectI.length; i++){
+                    if(selectI[i].selectedIndex > 0){
+                        info+= "<p>" + selectI[i].options[selectI[i].selectedIndex].value + "</p>";
+                    }
+                }                    
+                escribiendo.setAttribute("srcdoc", info);
+                divc.appendChild(escribiendo);
+            }
+        </script> 
+        </body>
+        </html>'''
+        nuevo = open('formulario.html', 'w')
+        nuevo.write(armar)
+        webbrowser.open('formulario.html')
 
+    def obtenerlink(self, obtener):
+        self.linkarchivo = obtener
 
-            
-     
-    
+    def generarhtml(self):
+        docHTML = open('reporteTokens.html','w')
+ 
+        head = '''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+ 
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        </head>
+        <body>
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Token</th>
+      <th scope="col">Lexema</th>
+      <th scope="col">Fila</th>
+      <th scope="col">Columna</th>
+    </tr>
+  </thead>
+  <tbody>
+        '''
+        docHTML.write(head)
+        for i in self.listatoken:
+            #if i.tipo != tipos.DESCONOCIDO:
+                docHTML.write('\n\t\t <tr class="table-success">')
+                docHTML.write('\n\t\t\t<th scope = "row">'+str(i.getTok()))
+                docHTML.write('</th>')
+                docHTML.write('\n\t\t\t<td>'+str(i.getValor()))
+                docHTML.write('</td>')
+                docHTML.write('\n\t\t\t<td>'+ str(i.getFila()))
+                docHTML.write('</td>')
+                docHTML.write('\n\t\t\t<td>'+ str(i.getColumna()))
+                docHTML.write('</td>')
+                docHTML.write('\n\t\t </tr>') 
+ 
+        docHTML.write('\n\t </tbody>')
+        docHTML.write('\n</table>')
+        docHTML.write('\n</body')
+        docHTML.write('\n</html>')
+ 
+        #cerrar archivo una vez termine de escribirlo
+        docHTML.close()
+ 
+        webbrowser.open_new_tab('reporteTokens.html')
 
-
-                
-                
-
+    def generarhtmlE(self):
+        docHTML = open('reporteErrores.html','w')
+ 
+        head = '''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+ 
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        </head>
+        <body>
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Token</th>
+      <th scope="col">Lexema</th>
+      <th scope="col">Fila</th>
+      <th scope="col">Columna</th>
+    </tr>
+  </thead>
+  <tbody>
+        '''
+        docHTML.write(head)
+        docHTML.write('\n\t\t <tr class="table-success">')
+        docHTML.write('\n\t\t\t<th scope = "row">')
+        docHTML.write('</th>')
+        docHTML.write('\n\t\t\t<td>')
+        docHTML.write('</td>')
+        docHTML.write('\n\t\t\t<td>')
+        docHTML.write('</td>')
+        docHTML.write('\n\t\t\t<td>')
+        docHTML.write('</td>')
+        docHTML.write('\n\t\t </tr>') 
+        docHTML.write('\n\t </tbody>')
+        docHTML.write('\n</table>')
+        docHTML.write('\n</body')
+        docHTML.write('\n</html>')
+ 
+        #cerrar archivo una vez termine de escribirlo
+        docHTML.close()
+ 
+        webbrowser.open_new_tab('reporteErrores.html')

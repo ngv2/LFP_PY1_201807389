@@ -32,8 +32,8 @@ class interfaz:
 
     def abrirarchivo(self):
         try:
-            archivo = askopenfilename(filetypes= [('Archivos Forms', '*.form')])
-            seleccion = open(archivo, encoding= 'utf-8')
+            self.archivo = askopenfilename(filetypes= [('Archivos Forms', '*.form')])
+            seleccion = open(self.archivo, encoding= 'utf-8')
             contentfile = seleccion.read()
             seleccion.close()
             self.textobox.delete('1.0', END)
@@ -45,34 +45,29 @@ class interfaz:
     def anarchivo(self):
         contenido = self.textobox.get('1.0', END)
         if len(contenido) -1>0:
+            self.lexico.obtenerlink(self.archivo)
             self.lexico.leyendo(contenido)
+
         else:
             messagebox.showwarning('Proyecto 1', 'Error: No hay contenido en el archivo')
 
     def seleccionescombo(self, eventObject):
         if self.combox.get() == 'Reporte de tokens':
-            print('uno')
+            if self.lexico.listatoken:
+                self.lexico.generarhtml()
+            else:
+                messagebox.showwarning('Proyecto 1', 'Error: No hay contenido en la lista')
         elif self.combox.get() == 'Reporte de errores':
-            print('dos')
+            self.lexico.generarhtmlE()
         elif self.combox.get() == 'Manual de usuario':
             #os.system('Manual de usuario.pdf')
             print('tres')
         elif self.combox.get() == 'Manual técnico':
-            #os.system('Manual técnico.pdf')
+            #os.system('[LFP]HT1_201807389.pdf')
             print('cuatro')
      
+
 
 if __name__ == '__main__':
     envio = Tk()
     interfaz(envio)
-
-
-
-
-
-
-
-
-
-
-
