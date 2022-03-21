@@ -47,7 +47,7 @@ class interfaz:
         if len(contenido) -1>0:
             self.lexico.obtenerlink(self.archivo)
             self.lexico.leyendo(contenido)
-
+ 
         else:
             messagebox.showwarning('Proyecto 1', 'Error: No hay contenido en el archivo')
 
@@ -60,11 +60,9 @@ class interfaz:
         elif self.combox.get() == 'Reporte de errores':
             self.lexico.generarhtmlE()
         elif self.combox.get() == 'Manual de usuario':
-            #os.system('Manual de usuario.pdf')
-            print('tres')
+            os.system('Manualdeusuario.pdf')
         elif self.combox.get() == 'Manual técnico':
-            #os.system('[LFP]HT1_201807389.pdf')
-            print('cuatro')
+            os.system('Manualtecnico.pdf')
      
 
 

@@ -28,6 +28,7 @@ class lectura:
                 columna += 8
             elif l == "    ":
                 columna +=4
+#Comprobar letras
             elif self.comprobarletras(l):
                 if estado == 0:
                     if ord(l) == 97 and (subestado ==0 or subestado == 1):
@@ -102,7 +103,7 @@ class lectura:
                     if aux == "valor":
                         concatenar = aux + l
                         estado = 0
-                columna += 1
+#Comprobar Simbolos estado 1
             elif self.comprobarsimbolos(l):
                 if estado == 1:
                     if ord(l) == 34 and subestado == 1:
@@ -149,6 +150,8 @@ class lectura:
                     elif ord(l) == 126 and subestado == 0:
                         self.listatoken.append (token('Simbolo', "", fila, columna))
                         concatenar += l
+
+#Comprobar Simbolos estado 3 (salida)
                 elif estado == 3:
                     if ord(l) == 34 and subestado == 1:
                         self.listatoken.append (token('Cadena', concatenar, fila, columna - len(concatenar)))
@@ -170,8 +173,12 @@ class lectura:
                     else :
                         if subestado == 1 or subestado == 2:
                             concatenar += l
+                else:
+                    self.listatoken.append (token('Desconocido', l, fila, columna))
+                    fila +=1
 
                 columna += 1
+
         self.html()    
                 
 
@@ -189,9 +196,11 @@ class lectura:
 
     def html(self):
         armar = '''<html>
-        <body> 
-        <form>
-
+        <body bgcolor="#C3E6CB"> 
+            <fieldset>
+            <form><CENTER>            
+            <br><br><br><br><br><h2>- INFORMACIÓN -</h2>
+            
         '''
 
         listacomponentes = []
@@ -255,7 +264,7 @@ class lectura:
                 elif tipo == "boton":
                     if valor != "" and evento != "":
                         if evento == "entrada":
-                            armar += '''<button onclick="clickf(event)">'''+ valor + '''</button>\n'''
+                            armar += '''<br><button onclick="clickf(event)">'''+ valor + '''</button>\n'''
                         elif evento == "info":
                             armar += '''<button onclick="clickf2(event)">''' + valor + '''</button>\n'''
                     elif valor == "" and evento != "":
@@ -318,6 +327,7 @@ class lectura:
  
         head = '''
         <!DOCTYPE html>
+        <h5><br><br><br><CENTER>REPORTE  DE  TOKENS</CENTER><br><br></h5>
         <html lang="en">
         <head>
         <meta charset="utf-8">
@@ -339,7 +349,7 @@ class lectura:
         '''
         docHTML.write(head)
         for i in self.listatoken:
-            #if i.tipo != tipos.DESCONOCIDO:
+            if i.getTok().lower() != "desconocido":
                 docHTML.write('\n\t\t <tr class="table-success">')
                 docHTML.write('\n\t\t\t<th scope = "row">'+str(i.getTok()))
                 docHTML.write('</th>')
@@ -350,7 +360,7 @@ class lectura:
                 docHTML.write('\n\t\t\t<td>'+ str(i.getColumna()))
                 docHTML.write('</td>')
                 docHTML.write('\n\t\t </tr>') 
- 
+
         docHTML.write('\n\t </tbody>')
         docHTML.write('\n</table>')
         docHTML.write('\n</body')
@@ -366,6 +376,7 @@ class lectura:
  
         head = '''
         <!DOCTYPE html>
+        <h5><br><br><br><CENTER>REPORTE  DE  ERRORES</CENTER><br><br></h5>
         <html lang="en">
         <head>
         <meta charset="utf-8">
@@ -386,16 +397,18 @@ class lectura:
   <tbody>
         '''
         docHTML.write(head)
-        docHTML.write('\n\t\t <tr class="table-success">')
-        docHTML.write('\n\t\t\t<th scope = "row">')
-        docHTML.write('</th>')
-        docHTML.write('\n\t\t\t<td>')
-        docHTML.write('</td>')
-        docHTML.write('\n\t\t\t<td>')
-        docHTML.write('</td>')
-        docHTML.write('\n\t\t\t<td>')
-        docHTML.write('</td>')
-        docHTML.write('\n\t\t </tr>') 
+        for i in self.listatoken:
+            if i.getTok().lower() == "desconocido":
+                docHTML.write('\n\t\t <tr class="table-success">')
+                docHTML.write('\n\t\t\t<th scope = "row">'+str(i.getTok()))
+                docHTML.write('</th>')
+                docHTML.write('\n\t\t\t<td>'+str(i.getValor()))
+                docHTML.write('</td>')
+                docHTML.write('\n\t\t\t<td>'+ str(i.getFila()))
+                docHTML.write('</td>')
+                docHTML.write('\n\t\t\t<td>'+ str(i.getColumna()))
+                docHTML.write('</td>')
+                docHTML.write('\n\t\t </tr>') 
         docHTML.write('\n\t </tbody>')
         docHTML.write('\n</table>')
         docHTML.write('\n</body')
